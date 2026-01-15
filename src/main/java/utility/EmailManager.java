@@ -14,11 +14,7 @@ import javax.mail.Transport;
 public class EmailManager {
 
     public static void sendMail() throws MessagingException {
-        String folder = "test-reports-" + browserType;
-        String zipFile = "test-reports-" + browserType + ".zip";
-
-        ZipUtil.pack(new File(folder), new File(zipFile));
-        System.out.println("Created ZIP for " + browserType + ": " + zipFile);
+        ZipUtil.pack(new File("test-reports\\"), new File("test-reports.zip"));
 
         //////////////////////////////////////////////////////////////////////////////////////
         String content = "Project Test Report At  " + String.valueOf(java.time.LocalDate.now()) ;
