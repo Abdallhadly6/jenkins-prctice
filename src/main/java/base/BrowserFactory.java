@@ -25,6 +25,15 @@ public class BrowserFactory {
 
         switch (Browser.toLowerCase()){
             case "chrome":
+                ChromeOptions options = new ChromeOptions();
+
+    // Headless mode for Jenkins
+    if (System.getProperty("headless") != null) {
+        options.addArguments("--headless=new");
+        options.addArguments("--no-sandbox");
+        options.addArguments("--disable-dev-shm-usage");
+        options.addArguments("--window-size=1920,1080");
+    }
                 driver = new ChromeDriver();
                 break;
             case "firefox":
