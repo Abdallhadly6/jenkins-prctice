@@ -34,7 +34,7 @@ public class BrowserFactory {
         options.addArguments("--disable-dev-shm-usage");
         options.addArguments("--window-size=1920,1080");
     }
-                driver = new ChromeDriver();
+                driver = new ChromeDriver(options);
                 break;
             case "firefox":
                 driver = new FirefoxDriver();
