@@ -8,7 +8,6 @@ import utility.EmailManager;
 import utility.ExtentReportManager;
 import utility.FileUtils;
 
-import javax.mail.MessagingException;
 import java.io.File;
 import java.io.IOException;
 
@@ -19,29 +18,33 @@ public class BaseClass {
     protected BrowserFactory factory;
     protected LoginPage loginPage;
 
+    protected static String browserType;
+
     @BeforeSuite
-    public void beforeSuite() {
-        FileUtils.deleteDirectoryIfExists(new File(System.getProperty("user.dir") + "/test-reports"));
-        ExtentReportManager.setExtent();  // Initialize report
+    @Parameters({"browserType"})
+    public void beforeSuite(@Optional("chrome") String brs) {
+        browserType = brs.toLowerCase();
+        String reportPath = System.getProperty("user.dir") + "/test-reports-" + browserType;
+        FileUtils.deleteDirectoryIfExists(new File(reportPath));
+        ExtentReportManager.setExtent(reportPath);  // browser-specific report folder
     }
 
     @AfterSuite
-    public void afterSuite() throws MessagingException {
-        ExtentReportManager.endReport();  // End report
-        EmailManager.sendMail(); // Optional
+    public void afterSuite() {
+        ExtentReportManager.endReport();
+        EmailManager.sendMail(browserType); // Send email with browser-specific zip
     }
 
     @BeforeMethod
-    public void setUp() throws IOException {
+    @Parameters({"browserType"})
+    public void setUp(@Optional("chrome") String brs) throws IOException {
         factory = new BrowserFactory();
-        driver = factory.getDriver(); // No parameter needed now
+        driver = factory.getDriver(brs); // Pass browser to factory
         loginPage = new LoginPage(driver);
     }
 
     @AfterMethod
-    public void tearDown(){
-        if (driver != null) {
-            driver.quit();
-        }
+    public void tearDown() {
+        if (driver != null) driver.quit();
     }
 }
