@@ -23,6 +23,9 @@ public class BrowserFactory {
         FileReader file = new FileReader("src/main/resources/config.Properties");
         prop = new Properties();
         prop.load(file);
+        boolean headless = Boolean.parseBoolean(
+                System.getProperty("headless", "false")
+        );
 
         switch (Browser.toLowerCase()){
             case "chrome":
