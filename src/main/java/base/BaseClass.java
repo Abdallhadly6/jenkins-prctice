@@ -28,7 +28,7 @@ public class BaseClass {
     @AfterSuite
     public void afterSuite() throws MessagingException {
         ExtentReportManager.endReport();  // End report
-        // EmailManager.sendMail(); // Optional
+        EmailManager.sendMail(); // Optional
     }
 
     @BeforeMethod
