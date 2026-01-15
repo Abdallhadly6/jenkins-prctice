@@ -19,44 +19,33 @@ public class BrowserFactory {
     public static WebDriver driver;
     public static Properties prop;
 
-    public WebDriver getDriver() throws IOException {
+    public WebDriver getDriver(String browser) throws IOException {
         // Load config properties
         FileReader file = new FileReader("src/main/resources/config.Properties");
         prop = new Properties();
         prop.load(file);
 
-        // Get browser type and headless mode from system properties
-        String browser = System.getProperty("browser", "chrome").toLowerCase();
         boolean headless = Boolean.parseBoolean(System.getProperty("headless", "true"));
+        browser = browser.toLowerCase();
 
         switch (browser) {
             case "chrome":
                 ChromeOptions chromeOptions = new ChromeOptions();
                 if (headless) {
-                    chromeOptions.addArguments("--headless=new");
-                    chromeOptions.addArguments("--no-sandbox");
-                    chromeOptions.addArguments("--disable-dev-shm-usage");
-                    chromeOptions.addArguments("--window-size=1920,1080");
+                    chromeOptions.addArguments("--headless=new", "--no-sandbox", "--disable-dev-shm-usage", "--window-size=1920,1080");
                 }
                 driver = new ChromeDriver(chromeOptions);
                 break;
 
             case "firefox":
                 FirefoxOptions firefoxOptions = new FirefoxOptions();
-                if (headless) {
-                    firefoxOptions.addArguments("-headless");
-                }
+                if (headless) firefoxOptions.addArguments("-headless");
                 driver = new FirefoxDriver(firefoxOptions);
                 break;
 
             case "edge":
                 EdgeOptions edgeOptions = new EdgeOptions();
-                if (headless) {
-                    edgeOptions.addArguments("--headless=new");
-                    edgeOptions.addArguments("--no-sandbox");
-                    edgeOptions.addArguments("--disable-dev-shm-usage");
-                    edgeOptions.addArguments("--window-size=1920,1080");
-                }
+                if (headless) edgeOptions.addArguments("--headless=new", "--no-sandbox", "--disable-dev-shm-usage", "--window-size=1920,1080");
                 driver = new EdgeDriver(edgeOptions);
                 break;
 
