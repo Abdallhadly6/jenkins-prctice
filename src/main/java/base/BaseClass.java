@@ -30,7 +30,7 @@ public class BaseClass {
     @AfterSuite
     public void afterSuite() throws MessagingException {
         ExtentReportManager.endReport();  // إنهاء التقرير وعمل flush
-        EmailManager.sendMail();
+        //EmailManager.sendMail();
     }
 
     @Parameters({"browserType"})
