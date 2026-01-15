@@ -7,9 +7,9 @@
     </listeners>
 
     <test verbose="2" preserve-order="true" name="POM">
-        <parameter name="browserType" value="chrome"/>
-        <classes>
-            <class name="TestPages.LoginPageTest"/>
-        </classes>
+        <parameter name="browserType" value="firefox"/>
+            <classes>
+                    <class name="TestPages.LoginPageTest"/>
+            </classes>
     </test>
 </suite>
