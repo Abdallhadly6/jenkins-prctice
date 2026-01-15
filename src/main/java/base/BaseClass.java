@@ -12,7 +12,6 @@ import javax.mail.MessagingException;
 import java.io.File;
 import java.io.IOException;
 
-
 public class BaseClass {
 
     @Getter
@@ -20,29 +19,29 @@ public class BaseClass {
     protected BrowserFactory factory;
     protected LoginPage loginPage;
 
-
     @BeforeSuite
     public void beforeSuite() {
         FileUtils.deleteDirectoryIfExists(new File(System.getProperty("user.dir") + "/test-reports"));
-        ExtentReportManager.setExtent();  // تهيئة إعدادات التقرير
+        ExtentReportManager.setExtent();  // Initialize report
     }
 
     @AfterSuite
     public void afterSuite() throws MessagingException {
-        ExtentReportManager.endReport();  // إنهاء التقرير وعمل flush
-        //EmailManager.sendMail();
+        ExtentReportManager.endReport();  // End report
+        // EmailManager.sendMail(); // Optional
     }
 
-    @Parameters({"browserType"})
     @BeforeMethod
-    public void setUp( String brsType) throws IOException {
+    public void setUp() throws IOException {
         factory = new BrowserFactory();
-        driver = factory.getDriver(brsType);
+        driver = factory.getDriver(); // No parameter needed now
         loginPage = new LoginPage(driver);
     }
 
     @AfterMethod
     public void tearDown(){
-        driver.quit();
+        if (driver != null) {
+            driver.quit();
+        }
     }
 }
