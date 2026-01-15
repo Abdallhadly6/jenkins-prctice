@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE suite SYSTEM "http://testng.org/testng-1.0.dtd">
+<suite name="All Test Suites">
+    <listeners>
+        <listener class-name="utility.ExtentReportListeners"/>
+        <listener class-name="utility.AnnotationTransformer"/>
+    </listeners>
+
+    <test verbose="2" preserve-order="true" name="POM">
+        <parameter name="browserType" value="firefox"/>
+            <classes>
+                    <class name="TestPages.LoginPageTest"/>
+            </classes>
+    </test>
+</suite>
