@@ -1,9 +1,22 @@
 pipeline {
     agent any
 
+    tools {
+        maven 'Maven-3'
+        jdk 'jdk17'   // make sure this name exists in Jenkins tools
+    }
+
     parameters {
-        string(name: 'BROWSERS', defaultValue: 'chrome,firefox,edge', description: 'Comma-separated browsers')
-        booleanParam(name: 'HEADLESS', defaultValue: true, description: 'Run in headless mode?')
+        string(
+            name: 'BROWSERS',
+            defaultValue: 'chrome,firefox,edge',
+            description: 'Comma-separated browsers to run'
+        )
+        booleanParam(
+            name: 'HEADLESS',
+            defaultValue: true,
+            description: 'Run tests headless'
+        )
     }
 
     stages {
@@ -20,13 +33,17 @@ pipeline {
                     def browsers = params.BROWSERS.split(',')
                     def branches = [:]
 
-                    for (b in browsers) {
-                        def browserName = b.trim()
-                        branches[browserName] = {
-                            stage("Tests on ${browserName}") {
-                                withEnv(["HEADLESS=${params.HEADLESS}", "BROWSER=${browserName}"]) {
-                                    bat "mvn clean test -DsuiteXmlFile=testng.xml -Dbrowser=${browserName} -Dheadless=${params.HEADLESS}"
-                                }
+                    for (String b : browsers) {
+                        def browser = b.trim()
+
+                        branches[browser] = {
+                            stage("Tests on ${browser}") {
+                                bat """
+                                    mvn clean test ^
+                                    -DsuiteXmlFile=testng.xml ^
+                                    -Dbrowser=${browser} ^
+                                    -Dheadless=${params.HEADLESS}
+                                """
                             }
                         }
                     }
@@ -39,7 +56,7 @@ pipeline {
 
     post {
         always {
-            echo 'All browsers finished!'
+            echo "All browsers finished!"
         }
     }
 }
