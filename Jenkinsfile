@@ -7,36 +7,35 @@ pipeline {
     }
 
     parameters {
+        string(
+            name: 'BROWSERS',
+            defaultValue: 'chrome',
+            description: 'Enter browsers to run, comma-separated (chrome,firefox,edge,safari)'
+        )
         choice(
             name: 'HEADLESS',
-            choices: ['true', 'false'],
-            description: 'Run in headless mode?'
-        )
-        extendedChoice(
-            name: 'BROWSERS',
-            type: 'PT_CHECKBOX',
-            value: 'chrome,firefox,edge,safari',
-            description: 'Select one or more browsers to run tests on',
-            multiSelectDelimiter: ','
+            choices: ['true','false'],
+            description: 'Run browsers in headless mode?'
         )
         string(
             name: 'EMAIL_TO',
             defaultValue: 'qa-team@example.com',
-            description: 'Comma-separated list of primary recipients'
+            description: 'Comma-separated primary recipients'
         )
         string(
             name: 'EMAIL_CC',
             defaultValue: '',
-            description: 'Comma-separated list of CC recipients'
+            description: 'Comma-separated CC recipients'
         )
         string(
             name: 'EMAIL_BCC',
             defaultValue: '',
-            description: 'Comma-separated list of BCC recipients'
+            description: 'Comma-separated BCC recipients'
         )
     }
 
     stages {
+
         stage('Checkout Code') {
             steps {
                 git branch: 'master',
@@ -47,43 +46,43 @@ pipeline {
         stage('Run Selenium Tests') {
             steps {
                 script {
-                    // Split selected browsers into a list
                     def browsers = params.BROWSERS.split(',')
-
-                    // Prepare parallel branches
-                    def branches = [:]
+                    def parallelBranches = [:]
 
                     for (b in browsers) {
                         def browserName = b.trim()
-                        branches[browserName] = {
+                        parallelBranches[browserName] = {
                             runTestsForBrowser(browserName)
                         }
                     }
 
-                    parallel branches
+                    parallel parallelBranches
                 }
             }
         }
     }
 }
 
-def runTestsForBrowser(String browser) {
-    stage("Tests on ${browser}") {
-        withEnv(["BROWSER=${browser}", "HEADLESS=${params.HEADLESS}"]) {
-            // Run Maven tests with TestNG
-            bat "mvn clean test -DsuiteXmlFile=testng.xml -Dbrowser=${browser} -Dheadless=${params.HEADLESS}"
+// helper function for parallel browser runs
+def runTestsForBrowser(String browserName) {
+    stage("Tests on ${browserName}") {
+        withEnv(["BROWSER=${browserName}", "HEADLESS=${params.HEADLESS}"]) {
+            // run Maven tests with system properties
+            bat "mvn clean test -DsuiteXmlFile=testng.xml -Dbrowser=${browserName} -Dheadless=${params.HEADLESS}"
 
-            // Archive artifacts
-            archiveArtifacts artifacts: "test-reports/**", fingerprint: true
+            // ensure folder exists
+            bat "if not exist test-reports mkdir test-reports"
 
-            // Create ZIP file for email
-            bat "powershell Compress-Archive -Path test-reports/* -DestinationPath test-reports-${browser}.zip"
+            // archive results for this browser
+            bat "powershell Compress-Archive -Path target/surefire-reports/* -DestinationPath test-reports-${browserName}.zip"
 
-            // Send email
+            archiveArtifacts artifacts: "test-reports-${browserName}.zip", fingerprint: true
+
+            // send email
             emailext(
-                subject: "Selenium Tests on ${browser} - ${currentBuild.fullDisplayName}",
+                subject: "Selenium Tests on ${browserName} - ${currentBuild.fullDisplayName}",
                 body: """
-                ✅ Tests completed on ${browser}.
+                ✅ Tests completed on ${browserName}.
                 Headless mode: ${params.HEADLESS}
                 Reports attached.
                 """,
@@ -91,7 +90,7 @@ def runTestsForBrowser(String browser) {
                 cc: params.EMAIL_CC,
                 bcc: params.EMAIL_BCC,
                 attachLog: true,
-                attachmentsPattern: "test-reports-${browser}.zip"
+                attachmentsPattern: "test-reports-${browserName}.zip"
             )
         }
     }
